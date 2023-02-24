@@ -1,35 +1,62 @@
-import React, { useState, useCallback } from 'react'
+import React, { useState, useCallback, useRef } from 'react'
 import { Form, InputGroup, Button } from "react-bootstrap"
 import { useConversations } from '../contexts/ConversationsProvider'
+import "../styles/OpenConversation.css"
+import { months } from '../resources/date'
+
+
+
+
+
 export default function OpenConversation() {
 
     const [text, setText] = useState()
     const { sendMessage, selectedConversation } = useConversations()
+
+    let prevDate = null
+
     const lastMessageRef = useCallback((node) => {
         if (node) {
             node.scrollIntoView({ smooth: true })
         }
     }, [])
 
-
-
-
-
-
-
     function handleSubmit() {
-        // e.preventDefault()
         sendMessage(selectedConversation.recipients.map(r => r.id),
-            text)
+            text, new Date().toString())
         setText('')
     }
     function handleKeypress(e) {
-        //it triggers by pressing the enter key
         if (e.keyCode === 13) {
             e.preventDefault()
             handleSubmit()
         }
     }
+
+
+    function defineDate(dateStr) {
+        const date = new Date(dateStr)
+        const curDate = new Date()
+        if (date.getFullYear() === curDate.getFullYear()) {
+            if (date.getDate() === curDate.getDate() && date.getMonth() === curDate.getMonth()) {
+                return "Today"
+            }
+            return `${date.getDate()} ${months[date.getMonth()]}`
+        } else {
+            return `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`
+        }
+    }
+    function defineTime(date) {
+        const hours = date.getHours()
+        const minutes = date.getMinutes()
+        if (minutes < 10) {
+            const minutesStr = `0${minutes}`
+            return `${hours}:${minutesStr}`
+        } else {
+            return `${hours}:${minutes}`
+        }
+    }
+
 
 
     return (
@@ -38,12 +65,36 @@ export default function OpenConversation() {
                 <div className='d-flex flex-column align-items-start justify-content-end px-3'>
                     {selectedConversation.messages.map((message, index) => {
                         const isLastMessage = index === selectedConversation.messages.length - 1
-                        return (
-                            <div ref={isLastMessage ? lastMessageRef : null} className={`my-1 d-flex flex-column ${message.fromMe ? 'align-self-end align-items-end' : 'align-items-start'}`} key={index}>
-                                <div className={`rounded px-2 py-1 ${message.fromMe ? 'bg-primary text-white' : 'border'}`}>{message.text}</div>
-                                <div className={`text-muted small ${message.fromMe ? 'text-right' : ''}`}>{message.fromMe ? 'You' : message.name}</div>
-                            </div>
-                        )
+                        const messageDate = new Date(message.date)
+
+                        const curDate = { day: messageDate.getDate().toString(), month: messageDate.getMonth().toString(), year: messageDate.getFullYear().toString() }
+
+                        if (prevDate === null || JSON.stringify(prevDate) !== JSON.stringify(curDate)) {
+                            prevDate = { ...curDate }
+                            return (
+                                <div ref={isLastMessage ? lastMessageRef : null} className={`w-100 my-1 d-flex flex-column ${message.fromMe ? 'align-items-end' : 'align-items-start'}`} key={index}>
+                                    <div className='date-separator align-self-center small'>{defineDate(message.date)}</div>
+                                    <div className={`d-flex flex-column align-items-start rounded px-2 py-1 ${message.fromMe ? 'bg-primary text-white' : 'border'}`}>
+                                        <div>{message.text}</div>
+                                        <div className='align-self-end' style={{ fontSize: ".5em" }}>{defineTime(messageDate)}</div>
+                                    </div>
+                                    <div className={`text-muted small ${message.fromMe ? 'text-right' : ''}`}>{message.fromMe ? 'You' : message.name}</div>
+                                </div>
+                            )
+                        }
+                        else {
+                            prevDate = { ...curDate }
+                            return (
+                                <div ref={isLastMessage ? lastMessageRef : null} className={`w-100 my-1 d-flex flex-column ${message.fromMe ? 'align-self-end align-items-end' : 'align-items-start'}`} key={index}>
+                                    <div className={`d-flex flex-column align-items-start rounded px-2 py-1 ${message.fromMe ? 'bg-primary text-white' : 'border'}`}>
+                                        <div>{message.text}</div>
+                                        <div className='align-self-end' style={{ fontSize: ".5em" }}>{`${new Date(message.date).getHours()}:${new Date(message.date).getMinutes()}`}</div>
+                                    </div>
+                                    <div className={`text-muted small ${message.fromMe ? 'text-right' : ''}`}>{message.fromMe ? 'You' : message.name}</div>
+                                </div>
+                            )
+                        }
+
                     })}
                 </div>
 
