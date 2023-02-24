@@ -23,7 +23,7 @@ export default function OpenConversation() {
 
     function handleSubmit() {
         sendMessage(selectedConversation.recipients.map(r => r.id),
-            text, new Date().toString())
+            text, new Date().toString(), selectedConversation.conId)
         setText('')
     }
     function handleKeypress(e) {

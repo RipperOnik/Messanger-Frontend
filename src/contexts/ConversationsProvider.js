@@ -16,15 +16,15 @@ export function ConversationsProvider({ id, children }) {
 
     const socket = useSocket()
 
-    function createConversation(recipients) {
-        setConversations(prev => [...prev, { recipients, messages: [] }])
+    function createConversation(recipients, conId) {
+        setConversations(prev => [...prev, { recipients, messages: [], conId }])
     }
-    const addMessageToConversation = useCallback(({ recipients, text, sender, date }) => {
+    const addMessageToConversation = useCallback(({ recipients, text, sender, date, conId }) => {
         setConversations(prevConversations => {
             const newMessage = { sender, text, date }
             let madeChange = false
             const newConversations = prevConversations.map(conversation => {
-                if (arrayEquality(conversation.recipients, recipients)) {
+                if (conversation.conId === conId) {
                     madeChange = true
                     return { ...conversation, messages: [...conversation.messages, newMessage] }
                 } else {
@@ -34,7 +34,7 @@ export function ConversationsProvider({ id, children }) {
             if (madeChange) {
                 return newConversations
             } else {
-                return [...prevConversations, { recipients, messages: [newMessage] }]
+                return [...prevConversations, { recipients, messages: [newMessage], conId }]
             }
         })
     }, [setConversations])
@@ -46,9 +46,9 @@ export function ConversationsProvider({ id, children }) {
         return () => socket.off('receive-message')
     }, [socket, addMessageToConversation])
 
-    function sendMessage(recipients, text, date) {
-        socket.emit('send-message', { recipients, text, date })
-        addMessageToConversation({ recipients, text, sender: id, date })
+    function sendMessage(recipients, text, date, conId) {
+        socket.emit('send-message', { recipients, text, date, conId })
+        addMessageToConversation({ recipients, text, sender: id, date, conId })
     }
 
     const formattedConversations = conversations.map((conversation, index) => {
