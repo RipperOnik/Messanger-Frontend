@@ -3,6 +3,7 @@ import { Form, InputGroup, Button } from "react-bootstrap"
 import { useConversations } from '../contexts/ConversationsProvider'
 import "../styles/OpenConversation.css"
 import { months } from '../resources/date'
+import ConversationTitle from './ConversationTitle'
 
 
 
@@ -23,7 +24,7 @@ export default function OpenConversation() {
 
     function handleSubmit() {
         sendMessage(selectedConversation.recipients.map(r => r.id),
-            text, new Date().toString(), selectedConversation.conId)
+            text, new Date().toString(), selectedConversation.conId, selectedConversation.name)
         setText('')
     }
     function handleKeypress(e) {
@@ -61,6 +62,8 @@ export default function OpenConversation() {
 
     return (
         <div className='d-flex flex-column flex-grow-1'>
+            <ConversationTitle selectedConversation={selectedConversation} />
+
             <div className='flex-grow-1 overflow-auto'>
                 <div className='d-flex flex-column align-items-start justify-content-end px-3'>
                     {selectedConversation.messages.map((message, index) => {
