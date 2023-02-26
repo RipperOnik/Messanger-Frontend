@@ -68,33 +68,18 @@ export default function OpenConversation() {
                         const messageDate = new Date(message.date)
 
                         const curDate = { day: messageDate.getDate().toString(), month: messageDate.getMonth().toString(), year: messageDate.getFullYear().toString() }
-
-                        if (prevDate === null || JSON.stringify(prevDate) !== JSON.stringify(curDate)) {
-                            prevDate = { ...curDate }
-                            return (
-                                <div ref={isLastMessage ? lastMessageRef : null} className={`w-100 my-1 d-flex flex-column ${message.fromMe ? 'align-items-end' : 'align-items-start'}`} key={index}>
-                                    <div className='date-separator align-self-center small'>{defineDate(message.date)}</div>
-                                    <div className={`d-flex flex-column align-items-start rounded px-2 py-1 ${message.fromMe ? 'bg-primary text-white' : 'border'}`}>
-                                        <div>{message.text}</div>
-                                        <div className='align-self-end' style={{ fontSize: ".5em" }}>{defineTime(messageDate)}</div>
-                                    </div>
-                                    <div className={`text-muted small ${message.fromMe ? 'text-right' : ''}`}>{message.fromMe ? 'You' : message.name}</div>
+                        const renderDate = prevDate === null || JSON.stringify(prevDate) !== JSON.stringify(curDate)
+                        prevDate = { ...curDate }
+                        return (
+                            <div ref={isLastMessage ? lastMessageRef : null} className={`w-100 my-1 d-flex flex-column ${message.fromMe ? 'align-items-end' : 'align-items-start'}`} key={index}>
+                                {renderDate && <div className='date-separator align-self-center small'>{defineDate(message.date)}</div>}
+                                <div className={`d-flex flex-column align-items-start rounded px-2 py-1 ${message.fromMe ? 'bg-primary text-white' : 'border'}`}>
+                                    <div>{message.text}</div>
+                                    <div className='align-self-end' style={{ fontSize: ".5em" }}>{defineTime(messageDate)}</div>
                                 </div>
-                            )
-                        }
-                        else {
-                            prevDate = { ...curDate }
-                            return (
-                                <div ref={isLastMessage ? lastMessageRef : null} className={`w-100 my-1 d-flex flex-column ${message.fromMe ? 'align-self-end align-items-end' : 'align-items-start'}`} key={index}>
-                                    <div className={`d-flex flex-column align-items-start rounded px-2 py-1 ${message.fromMe ? 'bg-primary text-white' : 'border'}`}>
-                                        <div>{message.text}</div>
-                                        <div className='align-self-end' style={{ fontSize: ".5em" }}>{`${new Date(message.date).getHours()}:${new Date(message.date).getMinutes()}`}</div>
-                                    </div>
-                                    <div className={`text-muted small ${message.fromMe ? 'text-right' : ''}`}>{message.fromMe ? 'You' : message.name}</div>
-                                </div>
-                            )
-                        }
-
+                                <div className={`text-muted small ${message.fromMe ? 'text-right' : ''}`}>{message.fromMe ? 'You' : message.name}</div>
+                            </div>
+                        )
                     })}
                 </div>
 
